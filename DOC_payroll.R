@@ -34,18 +34,25 @@ dfTotal$avgpay.emp.1000 <- dfTotal$Annual.payroll.1000/dfTotal$Number.of.employm
 df.avgpay <- dfTotal[order(dfTotal$avgpay.emp.1000, decreasing = T),]
 
 ggplot(df.payroll[2:6,], aes(x=NAICS.description, y = Annual.payroll.1000)) + geom_bar(stat = "identity") +
-    ylab("Total annual payroll in $1000") + ggtitle("Top Five Industrieis with Highest Payroll")
+    ylab("Total annual payroll in $1000") + 
+    scale_x_discrete(labels = c("Finance and Insurance", paste("Health Car and ","Social Assistance", sep = "\n"),
+                                "Manufacturing",
+                                paste("Professional, Scientific","and Technical Services", sep = "\n"),
+                                "Retail Trade")) + 
+    theme(text = element_text(size = 15)) +
+    ggtitle("Top Five Industrieis with Highest Total Payroll")
 dev.copy(png, file = "Top Five Industrieis with Highest Payroll.png", width = 1000, height = 500)
 dev.off()
 
-plot2 <- ggplot(df.avgpay[2:6,], aes(x=NAICS.description, y = avgpay.emp.1000)) + geom_bar(stat = "identity") +
+ggplot(df.avgpay[2:6,], aes(x=NAICS.description, y = avgpay.emp.1000)) + geom_bar(stat = "identity") +
     ylab("avg payroll per employee in $1000") + 
     scale_x_discrete(labels = c(paste("Commodity Contract","Dealing", sep = "\n"), 
                                 "Portfolio Management",
                                 paste("Securities and Commodity","Contracts","Intermediation","and Brokerage", sep = "\n"),
-                                paste("Securities, Commodity Contracts,","and other Financial Investmets"
+                                paste("Securities", "Commodity Contracts and","other Financial Investmets"
                                       ,"and Related Activities", sep = "\n"),
-                                "Sports Teams and Clubs")) + 
+                                paste("Sports Teams", "and Clubs", sep = "\n"))) + 
+    theme(text = element_text(size = 15)) +
     ggtitle("Top Five Industrieis with Highest Average Payroll per Employee")
 dev.copy(png, file = "Top Five Industrieis with Highest Average Payroll per Employee.png", width = 1000, height = 500)
 dev.off()
