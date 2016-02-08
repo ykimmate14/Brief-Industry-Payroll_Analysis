@@ -2,7 +2,7 @@ library(dplyr);library(ggplot2)
 
 #url <- "http://www2.census.gov/econ/susb/data/2012/us_6digitnaics_2012.xls"
 filedir <- "./Personal/us_6digitnaics_2012.csv"
-df <- read.csv("./us_6digitnaics_2012.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = c("", "NA"))
+df <- read.csv(filedir, header = TRUE, stringsAsFactors = FALSE, na.strings = c("", "NA"))
 row.names(df) <- NULL
 colnames(df) <- df[5,]
 df <- df[-c(1:7), -1]
@@ -34,10 +34,11 @@ dfTotal$avgpay.emp.1000 <- dfTotal$Annual.payroll.1000/dfTotal$Number.of.employm
 df.avgpay <- dfTotal[order(dfTotal$avgpay.emp.1000, decreasing = T),]
 
 ggplot(df.payroll[2:6,], aes(x=NAICS.description, y = Annual.payroll.1000)) + geom_bar(stat = "identity") +
-    ylab("Total annual payroll in $1000") + ggtitle("Top Five Industrieis with Highest Payroll") +
-    geom_text(aes(label=Annual.payroll.1000))
+    ylab("Total annual payroll in $1000") + ggtitle("Top Five Industrieis with Highest Payroll")
+dev.copy(png, file = "Top Five Industrieis with Highest Payroll.png", width = 1000, height = 500)
+dev.off()
 
-ggplot(df.avgpay[2:6,], aes(x=NAICS.description, y = avgpay.emp.1000)) + geom_bar(stat = "identity") +
+plot2 <- ggplot(df.avgpay[2:6,], aes(x=NAICS.description, y = avgpay.emp.1000)) + geom_bar(stat = "identity") +
     ylab("avg payroll per employee in $1000") + 
     scale_x_discrete(labels = c(paste("Commodity Contract","Dealing", sep = "\n"), 
                                 "Portfolio Management",
@@ -46,3 +47,5 @@ ggplot(df.avgpay[2:6,], aes(x=NAICS.description, y = avgpay.emp.1000)) + geom_ba
                                       ,"and Related Activities", sep = "\n"),
                                 "Sports Teams and Clubs")) + 
     ggtitle("Top Five Industrieis with Highest Average Payroll per Employee")
+dev.copy(png, file = "Top Five Industrieis with Highest Average Payroll per Employee.png", width = 1000, height = 500)
+dev.off()
