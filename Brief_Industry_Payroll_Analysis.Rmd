@@ -1,0 +1,78 @@
+---
+title: "Brief Industry Payroll Analysis"
+output: html_document
+
+---
+
+## Summary
+The report shows 1) the industry with highest total payroll and 2) the industry with highest average payroll per employee. The analyzed dataset was released by the US Department of Commerce. The definition of each variables can be found [here.](http://www.census.gov/econ/susb/definitions.html)
+
+
+## Analysis
+```{r, echo = FALSE}
+suppressWarnings(suppressMessages(library(ggplot2)))
+suppressWarnings(suppressMessages(library(dplyr)))
+```
+
+Load, clean, and organize dataset
+
+```{r, echo = TRUE}
+## load and organize the data
+df <- read.csv("./us_6digitnaics_2012.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = c("", "NA"))
+colnames(df) <- df[5,]
+df <- df[-c(1:7), -1]
+
+## convert class of columns with numeric values
+df <- cbind(df[,1], as.data.frame(lapply(df[,-1], function(x) gsub(",", "", x))))
+df[,3] <- as.numeric(as.character(df[,3]))
+df[,4] <- as.numeric(as.character(df[,4]))
+df[,5] <- as.numeric(as.character(df[,5]))
+df[,8] <- as.numeric(as.character(df[,8]))
+df[,10] <- as.numeric(as.character(df[,10]))
+
+## remove missing values and irrelevant variables
+df$EMPLOYMENT.RANGE.FLAG <- NULL
+df$EMPLOYMENT[df$EMPLOYMENT == 0] <- NA
+df <- na.omit(df)
+
+## change column names
+colnames(df) <- c("NAICS.description", "Enterprise.employment.size", "Number.of.firms", 
+                  "Number.of.establishments", "Number.of.employment", "Employment.noise flag", 
+                  "Annual.payroll.1000", "Annual.payroll.noise.flag", 
+                  "Estimated.receipt.1000", "Estimated.receipts.noise.flag")
+
+# Since we are only interested in total payroll values by industry, remove unnecessary values accordingly
+dfTotal <- df[which(as.character(df$Enterprise.employment.size) %in% c("01:  Total")),]
+dfTotal <- df[df$Enterprise.employment.size == "01:  Total",]
+dfTotal <- dfTotal[!duplicated(dfTotal$`NAICS.description`),]
+```
+
+1) the top 5 industry with highest total payroll is as below:
+
+```{r, echo=TRUE, fig.width = 10, fig.height= 5}
+df.payroll <- dfTotal[order(dfTotal$Annual.payroll.1000, decreasing = T),]
+
+ggplot(df.payroll[2:6,], aes(x=NAICS.description, y = Annual.payroll.1000)) + geom_bar(stat = "identity") +
+    ylab("Total annual payroll in $1000") + ggtitle("Top Five Industrieis with Highest Payroll")
+print(df.payroll[2:6, 1], row.names = FALSE)
+```
+
+2) the top 5 industry with highest average payroll per employee is as below:
+
+```{r, echo=TRUE, fig.width = 10, fig.height= 5}
+dfTotal$avgpay.emp.1000 <- dfTotal$Annual.payroll.1000/dfTotal$Number.of.employment
+df.avgpay <- dfTotal[order(dfTotal$avgpay.emp.1000, decreasing = T),]
+
+ggplot(df.avgpay[2:6,], aes(x=NAICS.description, y = avgpay.emp.1000)) + geom_bar(stat = "identity") +
+    ylab("avg payroll per employee in $1000") + 
+    scale_x_discrete(labels = c(paste("Commodity Contract","Dealing", sep = "\n"), 
+                                "Portfolio Management",
+                                paste("Securities and Commodity","Contracts",
+                                      "Intermediation","and Brokerage", sep = "\n"),
+                                paste("Securities, Commodity Contracts,","and other Financial Investmets"
+                                      ,"and Related Activities", sep = "\n"),
+                                "Sports Teams and Clubs")) + 
+    ggtitle("Top Five Industrieis with Highest Average Payroll per Employee")
+
+print(df.avgpay[2:6, 1], row.names = FALSE)
+```
